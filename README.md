@@ -21,8 +21,7 @@ else:
 
 b = Builder()
 t = Task(cmd)
-t.AddFlag("-v")
-t.AddArg("main.py")
+t.AddArgs("-v", "main.py")
 b.AddTask(t)
 b.CMDRun()
 ```
@@ -32,8 +31,7 @@ b.CMDRun()
 from sbuilder import *
 
 t_compile = Task("gcc")
-t_compile.AddArg("main", "-o")
-t_compile.AddArg("src/main.c")
+t_compile.AddArgs("main", "-o", "src/main.c")
 
 t_run = Task("./main")
 
@@ -71,9 +69,7 @@ func `GetPlatform()` - get system platform
 - param `cmd` - command to run (e.g. "python", "gcc", etc.)
 - param `com` - print comment instead of standard log
 
-func `AddFlag(flag)` - add flag to task (e.g. `.AddFlag("-v")`). This is a fluent method that returns the instance itself for chaining.
-
-func `AddArg(arg, flag)` - add arg to task (e.g. `.AddArg("main.c")`, `.AddArg`). This is a fluent method that returns the instance itself for chaining.
+func `AddArgs(args)` - add arg to task (e.g. `.AddArgs("main.c", "-o", "app")`). This is a fluent method that returns the instance itself for chaining.
 
 func `GetFullTask()` - return task as list (e.g. `.GetFullTask()` will return `['gcc', 'main.c', '-o', './app']`)
 
