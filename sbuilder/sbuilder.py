@@ -145,7 +145,7 @@ class Builder():
             ft = task.GetFullTask()
             if task.com: print(task.com)
             else: 
-                print("[SB-CMD]", datetime.now().strftime("%H.%M.%S"), "RUNNING > ", " ".join(ft))
+                print("[SB-CMD]", datetime.now().strftime("%H.%M.%S"), "RUNNING > ", " ".join(list(ft)))
             proc = sp.run(ft)
             res_time = time.time() - start_time
             if proc.returncode:
