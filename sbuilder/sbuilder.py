@@ -3,6 +3,8 @@
 
 from datetime import datetime
 from enum import Enum, auto
+from pathlib import Path
+import json
 import sys
 import time
 
@@ -45,6 +47,46 @@ class Status(Enum):
 def CMDOut(*cmd):
     import subprocess as sp
     return sp.check_output(cmd, text=True).strip()
+
+def GenCompileCommands(tasks: list['Task'], output_filename="compile_commands.json"):
+    cpp_exts = {".cpp", ".c", ".cc", ".cxx", ".c++"}
+    compilers = {"g++", "gcc", "clang", "clang++", "c++", "cc"}
+    commands = []
+    cwd = str(Path.cwd())
+
+    for task in tasks:
+        full_cmd = task.GetFullTask()
+        compiler_bin = Path(full_cmd[0]).name
+
+        if compiler_bin not in compilers:
+            continue
+
+        sources = [str(arg) for arg in full_cmd if Path(arg).suffix.lower() in cpp_exts]
+        if not sources:
+            continue
+
+        flags = []
+        skip_next = False
+        for arg in full_cmd[1:]:
+            if skip_next:
+                skip_next = False
+                continue
+            if arg == "-o":
+                skip_next = True
+                continue
+            if Path(arg).suffix.lower() not in cpp_exts:
+                flags.append(str(arg))
+
+        for src in sources:
+            commands.append({
+                "directory": cwd,
+                "arguments": [full_cmd[0]] + flags + ["-c", src],
+                "file": src
+            })
+
+    if commands:
+        with open(output_filename, "w") as f:
+            json.dump(commands, f, indent=2)
 
 class Task():
     """Task class, that contains task itself and args
