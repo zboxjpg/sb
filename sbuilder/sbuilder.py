@@ -8,6 +8,8 @@ import json
 import sys
 import time
 
+FLAG_VERBOSE = False
+
 class Platform(Enum):
     LINUX    = auto()
     WIN32    = auto()
@@ -98,6 +100,7 @@ class Task():
         self.args = []
         self.cmd = cmd
         self.com = com
+        if FLAG_VERBOSE: print(f"[VERB : Task.__init__] Created object.\n\targs: `{self.args}`\n\tcmd: `{self.cmd}`\n\tcom: `{self.com}`")
 
     def AddArgs(self, *args):
         """
@@ -105,7 +108,10 @@ class Task():
         
         e.g. .AddArgs("-o", "app", "-O2", etc.)
         """
-        for el in args: self.args.append(el)
+        if FLAG_VERBOSE: print(f"[VERB : Task.AddArgs] Called")
+        for el in args: 
+            self.args.append(str(el))
+            if FLAG_VERBOSE: print(f"[VERB : Task.AddArgs] Added arg `{el}`")
 
         return self
 
@@ -115,6 +121,7 @@ class Task():
 
         e.g. ['g++', 'main.cpp', '-o', 'app']
         """
+        if FLAG_VERBOSE: print(f"[VERB : Task.GetFullTask] Called")
         full_task = [self.cmd]
         full_task.extend(self.args)
         return full_task
@@ -123,8 +130,10 @@ class Builder():
     "Builder class that contains tasks and used to run tasks sync & async"
     def __init__(self):
         self.tasks : list[Task] = []
+        if FLAG_VERBOSE: print(f"[VERB : Builder.__init__] Created object.\n\ttasks: `{self.tasks}`")
 
     def ClearTasks(self):
+        if FLAG_VERBOSE: print(f"[VERB : Builder.ClearTasks] Called")
         self.tasks = []
         return self
 
@@ -134,20 +143,25 @@ class Builder():
 
         e.g. .AddTask(Task("g++").AddArg("main.cpp").AddArg("app", "-o"))
         """
+        if FLAG_VERBOSE: print(f"[VERB : Builder.AddTask] Called")
         self.tasks.append(task)
+        if FLAG_VERBOSE: print(f"[VERB : Builder.AddTask] Added task `{task}`")
         return self
 
     def CMDRun(self):
         "Run tasks"
         import subprocess as sp
+        if FLAG_VERBOSE: print(f"[VERB : Builder.CMDRun] Called")
         for task in self.tasks:
             start_time = time.time()
             ft = task.GetFullTask()
+            if FLAG_VERBOSE: print(f"[VERB : Builder.CMDRun] Proceed task `{task}`\n\tstart_time: `{start_time}`\n\tft: `{ft}`")
             if task.com: print(task.com)
             else: 
                 print("[SB-CMD]", datetime.now().strftime("%H.%M.%S"), "RUNNING > ", " ".join(list(ft)))
             proc = sp.run(ft)
             res_time = time.time() - start_time
+            if FLAG_VERBOSE: print(f"[VERB : Builder.CMDRun] proc: `{proc}`\n\tres_time: `{res_time}`")
             if proc.returncode:
                 print("\n[SB-CMD]", datetime.now().strftime("%H.%M.%S"), "EXITCODE > ", proc.returncode)
                 print(f"[SB-CMD] Build finished in just {res_time:.3f}s")
